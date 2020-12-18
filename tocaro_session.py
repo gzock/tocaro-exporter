@@ -3,7 +3,7 @@
 import re
 import json
 from logging import getLogger
-from time import time
+from time import time, sleep
 
 from requests import session, Response
 from bs4 import BeautifulSoup
@@ -103,7 +103,7 @@ class TocaroSession():
     self.logger.info("got message successfully.")
     return res.json()
 
-  def get_all_messages(self, group_id: str) -> dict:
+  def get_all_messages(self, group_id: str, interval: float = 0.3) -> dict:
     self.logger.info("let's get all messages. target group is " + group_id)
 
     messages = []
@@ -115,6 +115,7 @@ class TocaroSession():
       messages.extend(new)
       next_id = messages[-1]["ulid"]
       self.logger.debug("next message id: " + next_id)
+      sleep(interval)
 
     self.logger.info("got all message successfully.")
     return messages

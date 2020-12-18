@@ -2,7 +2,6 @@
 
 import os
 from configparser import ConfigParser
-from time import sleep
 from logging import getLogger, basicConfig, INFO, DEBUG
 import json
 from distutils.util import strtobool
@@ -57,14 +56,15 @@ def main():
       continue
 
     logger.info("get message from group_id: " + group["code"])
-    messages = tocaro.get_all_messages(group_id=group["code"])
+    messages = tocaro.get_all_messages(
+        group_id=group["code"],
+        interval=float(config["common"]["interval"])
+    )
 
     output_path = "%s/%s.json" % (config["output"]["path"], group["code"])
     logger.info("message saving... output path: " + output_path)
 
     save_json(messages, output_path)
-
-    sleep(int(config["common"]["interval"]))
 
 if __name__ == "__main__":
   basicConfig(
