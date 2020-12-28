@@ -14,6 +14,9 @@ class CsrfTokenNotFoundError(Exception):
 class AuthTokenNotFoundError(Exception):
   pass
 
+class SignInError(Exception):
+  pass
+
 class TocaroSession():
 
   logger = getLogger(__name__)
@@ -53,6 +56,8 @@ class TocaroSession():
     self.signin_data["authenticity_token"] = csrf_token
 
     res = self.session.post(self.__signin_url, data=self.signin_data)
+    if "メールアドレスかパスワードが間違っています。" in res.text:
+      raise SignInError("signin failed. needs confirm username or password.")
     res.raise_for_status()
     self.logger.info("signin successfully.")
 

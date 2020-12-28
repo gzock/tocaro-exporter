@@ -7,7 +7,7 @@ from logging import getLogger, basicConfig, INFO, DEBUG
 import json
 from distutils.util import strtobool
 
-from tocaro_session import TocaroSession
+from tocaro_session import TocaroSession, CsrfTokenNotFoundError, SignInError
 
 class TocaroExporter():
   logger = getLogger(__name__)
@@ -91,7 +91,8 @@ def main(args):
   logger.info("tocaro exporter execution start.")
 
   if 2 > sum(list(map(lambda x: bool(vars(args)[x]), vars(args)))):
-    raise InvalidArgsError
+    logger.error("specified arguments is wrong.")
+    exit(1)
 
   logger.info("reading config...")
   config = ConfigParser()
@@ -105,10 +106,14 @@ def main(args):
     logger.debug("enable debug logging.")
 
   logger.info("connect to tocaro.")
-  exporter = TocaroExporter(
-      email=config["account"]["email"], 
-      password=config["account"]["password"]
-  )
+  try:
+    exporter = TocaroExporter(
+        email=config["account"]["email"], 
+        password=config["account"]["password"]
+    )
+  except (CsrfTokenNotFoundError, SignInError) as e:
+    logger.error("signin processing unsuccessfully... please, check error message: " + str(e))
+    exit(1)
 
   exporter.group_type = config["common"]["group_type"]
   exporter.interval = config["common"]["interval"]
